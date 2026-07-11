@@ -9,6 +9,7 @@ import NewReview from './pages/NewReview';
 import ReviewDetail from './pages/ReviewDetail';
 import ReviewHistory from './pages/ReviewHistory';
 import Profile from './pages/Profile';
+import ForgotPassword from './pages/ForgotPassword';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -36,6 +37,7 @@ function AppContent() {
             <Route path="/review/new" element={<ProtectedRoute><NewReview /></ProtectedRoute>} />
             <Route path="/review/:id" element={<ProtectedRoute><ReviewDetail /></ProtectedRoute>} />
             <Route path="/reviews" element={<ProtectedRoute><ReviewHistory /></ProtectedRoute>} />
+            <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           </Routes>
         </main>

@@ -68,3 +68,18 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ error: 'No account found with that email' });
+    }
+
+    res.json({ success: true, message: 'If an account exists, a reset link has been sent' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

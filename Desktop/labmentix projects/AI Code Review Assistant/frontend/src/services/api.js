@@ -27,6 +27,7 @@ export const authAPI = {
   getProfile: () => API.get('/auth/profile'),
   updateProfile: (data) => API.put('/auth/profile', data),
   changePassword: (data) => API.put('/auth/change-password', data),
+  forgotPassword: (data) => API.post('/auth/forgot-password', data),
 };
 
 export const reviewAPI = {
