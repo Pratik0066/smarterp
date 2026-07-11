@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
-import { reviewAPI } from '../services/api';
+import { reviewAPI, aiAPI } from '../services/api';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Trash2, AlertCircle, AlertTriangle, Info, Lightbulb, Shield, Zap, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Trash2, AlertCircle, AlertTriangle, Info, Lightbulb, Shield, Zap, RefreshCw, BookOpen, FileText, Loader2 } from 'lucide-react';
 
 const SEVERITY_CONFIG = {
   error: { color: 'bg-red-50 text-red-700 border-red-200', icon: AlertCircle, badge: 'bg-red-500' },
@@ -38,6 +38,10 @@ export default function ReviewDetail() {
   const [review, setReview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeFindingTab, setActiveFindingTab] = useState('all');
+  const [explanation, setExplanation] = useState('');
+  const [docs, setDocs] = useState('');
+  const [explaining, setExplaining] = useState(false);
+  const [generatingDocs, setGeneratingDocs] = useState(false);
 
   useEffect(() => {
     reviewAPI.getOne(id)
@@ -55,6 +59,24 @@ export default function ReviewDetail() {
     } catch {
       toast.error('Failed to delete');
     }
+  };
+
+  const handleExplain = async () => {
+    setExplaining(true);
+    try {
+      const res = await aiAPI.explain({ code: review.code_snippet, language: review.language });
+      setExplanation(res.data.explanation);
+    } catch { toast.error('Failed to generate explanation'); }
+    finally { setExplaining(false); }
+  };
+
+  const handleGenerateDocs = async () => {
+    setGeneratingDocs(true);
+    try {
+      const res = await aiAPI.generateDocs({ code: review.code_snippet, language: review.language });
+      setDocs(res.data.documentation);
+    } catch { toast.error('Failed to generate docs'); }
+    finally { setGeneratingDocs(false); }
   };
 
   if (loading) {
@@ -174,6 +196,34 @@ export default function ReviewDetail() {
               <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">{review.ai_review.explanation}</p>
             </div>
           )}
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h3 className="font-semibold text-gray-900 mb-4">AI Tools</h3>
+            <div className="flex gap-3 mb-4">
+              <button onClick={handleExplain} disabled={explaining}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition disabled:opacity-50 text-sm font-medium">
+                {explaining ? <Loader2 size={16} className="animate-spin" /> : <BookOpen size={16} />}
+                Explain Code
+              </button>
+              <button onClick={handleGenerateDocs} disabled={generatingDocs}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition disabled:opacity-50 text-sm font-medium">
+                {generatingDocs ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
+                Generate Docs
+              </button>
+            </div>
+            {explanation && (
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h4 className="font-medium text-blue-900 mb-2">Explanation</h4>
+                <p className="text-sm text-blue-800 whitespace-pre-wrap">{explanation}</p>
+              </div>
+            )}
+            {docs && (
+              <div className="mt-3 p-4 bg-gray-900 rounded-lg">
+                <h4 className="font-medium text-green-400 mb-2">Documentation</h4>
+                <pre className="text-sm text-gray-300 whitespace-pre-wrap overflow-x-auto">{docs}</pre>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="space-y-6">
