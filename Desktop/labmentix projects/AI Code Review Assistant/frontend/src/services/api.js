@@ -55,4 +55,10 @@ export const projectAPI = {
   delete: (id) => API.delete(`/projects/${id}`),
 };
 
+export const uploadAPI = {
+  uploadFile: (formData) => API.post('/upload/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+};
+
 export default API;
